@@ -1,20 +1,9 @@
 #!/bin/bash
 ## Interactive script for building/installing FreeSWITCH from source on Debian 12.
-## Original URL: https://gist.github.com/mariogasparoni/dc4490fcc85a527ac45f3d42e35a962c
-##
-## Enhanced version with:
-##   - Interactive prompts for installation path and version
-##   - Dedicated freeswitch user/group
-##   - Symbolic links to standard Debian paths
-##   - Global PATH configuration
-##   - systemd service (auto-enable + auto-start)
 ##
 ## Author : Laurent Raymond
 ## GitHub : https://github.com/raystone06
 ##
-## Freely distributed under the MIT license
-##
-## Run with: sudo bash install-freeswitch.sh
 
 set -e
 
@@ -45,7 +34,7 @@ print_banner() {
     echo -e "${CYAN}================================================================${RESET}"
     echo -e "${CYAN}||${RESET}                                                            ${CYAN}||${RESET}"
     echo -e "${CYAN}||${RESET}   ${BOLD}${WHITE}WELCOME TO THE FREESWITCH BUILD AND INSTALL SCRIPT${RESET}       ${CYAN}||${RESET}"
-    echo -e "${CYAN}||${RESET}   ${BOLD}${WHITE}                  ON DEBIAN 12${RESET}                            ${CYAN}||${RESET}"
+    echo -e "${CYAN}||${RESET}   ${BOLD}${WHITE}                  ON DEBIAN 12${RESET}                           ${CYAN}||${RESET}"
     echo -e "${CYAN}||${RESET}                                                            ${CYAN}||${RESET}"
     echo -e "${CYAN}================================================================${RESET}"
     echo ""
@@ -347,32 +336,27 @@ print_success "Global PATH configured"
 # ----- 5.6 systemd service -----
 sudo tee /etc/systemd/system/freeswitch.service > /dev/null <<EOF
 [Unit]
-Description=FreeSWITCH Open Source Telephony Platform
-Documentation=https://developer.signalwire.com/freeswitch/
+Description=freeswitch
 Wants=network-online.target
-After=network-online.target syslog.target
+Requires=network.target local-fs.target
+After=network.target network-online.target local-fs.target
 
 [Service]
 Type=forking
 PIDFile=/var/run/freeswitch/freeswitch.pid
-Environment="DAEMON_OPTS=-nonat"
-EnvironmentFile=-/etc/default/freeswitch
-ExecStartPre=/bin/mkdir -p /var/run/freeswitch
-ExecStartPre=/bin/chown -R $FS_USER:$FS_GROUP /var/run/freeswitch
-ExecStart=$PREFIX/bin/freeswitch -ncwait -nonat -u $FS_USER -g $FS_GROUP \$DAEMON_OPTS
-ExecReload=$PREFIX/bin/fs_cli -x reload
+ExecStart=
+ExecStart=$PREFIX/bin/freeswitch -u $FS_USER -g $FS_GROUP -ncwait -rp
 TimeoutStartSec=45
 TimeoutStopSec=45
 Restart=on-failure
-RestartSec=5
+UMask=0007
 
-# Security hardening
-User=$FS_USER
-Group=$FS_GROUP
+WorkingDirectory=$PREFIX/bin
+User=root
+Group=daemon
 LimitCORE=infinity
-LimitNOFILE=999999
+LimitNOFILE=100000
 LimitNPROC=60000
-LimitSTACK=240
 LimitRTPRIO=infinity
 LimitRTTIME=7000000
 IOSchedulingClass=realtime
@@ -380,23 +364,8 @@ IOSchedulingPriority=2
 CPUSchedulingPolicy=rr
 CPUSchedulingPriority=89
 
-# Isolation
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=full
-ProtectHome=true
-
 [Install]
 WantedBy=multi-user.target
-EOF
-
-# Optional environment file
-sudo tee /etc/default/freeswitch > /dev/null <<'EOF'
-# Options passed to the FreeSWITCH daemon at startup
-# -nonat : disable automatic NAT detection
-# -nf    : do not fork
-# -hp    : high priority
-DAEMON_OPTS="-nonat"
 EOF
 print_success "systemd service installed"
 
