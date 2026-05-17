@@ -26,7 +26,7 @@ This script gives you a **clean, reproducible, source-based installation** strai
 ```bash
 git clone https://github.com/raystone06/build-and-install-freeswitch-on-debian-12.git
 cd build-and-install-freeswitch-on-debian-12
-sudo bash install-freeswitch.sh
+sudo bash build-and-install-freeswitch.sh
 ```
 
 ---
