@@ -49,6 +49,13 @@ sudo bash build-and-install-freeswitch.sh
 - Installs a hardened `systemd` service
 - Enables and starts the service automatically
 
+The script will then ask you two questions:
+
+1. **Installation path** (default: `/opt/freeswitch`)
+2. **FreeSWITCH version** (default: `master`)
+
+You can press `ENTER` to accept the defaults, or provide your own values.
+
 ---
 
 ## Requirements
@@ -61,14 +68,7 @@ sudo bash build-and-install-freeswitch.sh
 
 ---
 
-The script will then ask you two questions:
-
-1. **Installation path** (default: `/opt/freeswitch`)
-2. **FreeSWITCH version** (default: `master`)
-
-You can press `ENTER` to accept the defaults, or provide your own values.
-
-### Build time
+## Build time
 
 Expect the full build to take **20 to 30 minutes** on modern hardware (more on low-end machines or VMs with limited CPU). The longest steps are the compilation of `spandsp`, `sofia-sip`, and FreeSWITCH itself.
 
